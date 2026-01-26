@@ -74,7 +74,9 @@ class IsolationForestModel(BaseDetectionModel):
         scores = self.model.decision_function(X_scaled)
         labels = self.model.predict(X_scaled)
 
-        anomaly_scores = 1 - (scores - scores.min()) / (scores.max() - scores.min() + 1e-10)
+        anomaly_scores = 1 - (scores - scores.min()) / (
+            scores.max() - scores.min() + 1e-10
+        )
 
         return anomaly_scores, labels
 
@@ -115,7 +117,7 @@ class IsolationForestModel(BaseDetectionModel):
 
 
 class AutoencoderModel(BaseDetectionModel):
-    """Autoencoder for unsupervised anomaly detection"""
+    """Autoencoder for unsupervised anomaly detection using sklearn MLP"""
 
     def __init__(self):
         super().__init__("autoencoder")
@@ -132,35 +134,20 @@ class AutoencoderModel(BaseDetectionModel):
         self.reconstruction_errors: np.ndarray = np.array([])
 
     def _build_model(self, input_dim: int):
-        """Build autoencoder model"""
-        try:
-            import tensorflow as tf
-            from tensorflow import keras
-            from tensorflow.keras import layers, Model
+        """Build autoencoder model using sklearn MLPRegressor"""
+        from sklearn.neural_network import MLPRegressor
 
-            input_layer = layers.Input(shape=(input_dim,))
-            encoded = input_layer
+        hidden_layers = tuple(self.hidden_layers) + (self.encoding_dim,)
 
-            for units in self.hidden_layers:
-                encoded = layers.Dense(units, activation="relu")(encoded)
-                encoded = layers.Dropout(self.dropout_rate)(encoded)
-
-            encoded = layers.Dense(self.encoding_dim, activation="relu")(encoded)
-
-            decoded = encoded
-            for units in reversed(self.hidden_layers):
-                decoded = layers.Dense(units, activation="relu")(decoded)
-                decoded = layers.Dropout(self.dropout_rate)(decoded)
-
-            output_layer = layers.Dense(input_dim, activation="linear")(decoded)
-
-            autoencoder = Model(input_layer, output_layer)
-            autoencoder.compile(optimizer="adam", loss="mse")
-
-            return autoencoder
-        except ImportError:
-            logger.warning("TensorFlow not available, using sklearn MLP")
-            return None
+        return MLPRegressor(
+            hidden_layer_sizes=hidden_layers,
+            activation="relu",
+            solver="adam",
+            max_iter=self.epochs,
+            random_state=42,
+            early_stopping=True,
+            validation_fraction=0.1,
+        )
 
     def train(self, X: np.ndarray, feature_names: List[str]) -> None:
         """Train autoencoder on normal data"""
@@ -168,29 +155,12 @@ class AutoencoderModel(BaseDetectionModel):
         X_scaled = self.scaler.fit_transform(X)
 
         self.model = self._build_model(X.shape[1])
+        self.model.fit(X_scaled, X_scaled)
 
-        if self.model is not None:
-            self.model.fit(
-                X_scaled,
-                X_scaled,
-                epochs=self.epochs,
-                batch_size=self.batch_size,
-                verbose=0,
-            )
-
-            predictions = self.model.predict(X_scaled, verbose=0)
-            self.reconstruction_errors = np.mean(np.power(X_scaled - predictions, 2), axis=1)
-        else:
-            from sklearn.neural_network import MLPRegressor
-
-            self.model = MLPRegressor(
-                hidden_layer_sizes=tuple(self.hidden_layers),
-                max_iter=self.epochs,
-                random_state=42,
-            )
-            self.model.fit(X_scaled, X_scaled)
-            predictions = self.model.predict(X_scaled)
-            self.reconstruction_errors = np.mean(np.power(X_scaled - predictions, 2), axis=1)
+        predictions = self.model.predict(X_scaled)
+        self.reconstruction_errors = np.mean(
+            np.power(X_scaled - predictions, 2), axis=1
+        )
 
         self.is_trained = True
         logger.info(f"Autoencoder trained on {X.shape[0]} samples")
@@ -212,7 +182,9 @@ class AutoencoderModel(BaseDetectionModel):
         error_mean = np.mean(self.reconstruction_errors)
         error_std = np.std(self.reconstruction_errors)
 
-        anomaly_scores = np.clip((reconstruction_errors - error_mean) / (error_std + 1e-10), 0, 1)
+        anomaly_scores = np.clip(
+            (reconstruction_errors - error_mean) / (error_std + 1e-10), 0, 1
+        )
 
         labels = (anomaly_scores > 0.5).astype(int)
 
@@ -308,7 +280,9 @@ class EnsembleDetector:
         self.models[model.name] = model
         logger.info(f"Added model: {model.name}")
 
-    def train(self, X_normal: np.ndarray, X_attack: Optional[np.ndarray] = None) -> None:
+    def train(
+        self, X_normal: np.ndarray, X_attack: Optional[np.ndarray] = None
+    ) -> None:
         """Train all models"""
         for name, model in self.models.items():
             if isinstance(model, XGBoostModel) and X_attack is not None:
@@ -373,7 +347,11 @@ class EnsembleDetector:
         )
 
     def _generate_explanation(
-        self, model_name: str, score: float, importance: Dict[str, float], feature_names: List[str]
+        self,
+        model_name: str,
+        score: float,
+        importance: Dict[str, float],
+        feature_names: List[str],
     ) -> str:
         """Generate natural language explanation"""
         if score < 0.3:
@@ -381,7 +359,9 @@ class EnsembleDetector:
 
         top_features = sorted(importance.items(), key=lambda x: x[1], reverse=True)[:3]
 
-        feature_str = ", ".join([f"{name} ({contrib:.2f})" for name, contrib in top_features])
+        feature_str = ", ".join(
+            [f"{name} ({contrib:.2f})" for name, contrib in top_features]
+        )
 
         return f"{model_name}: Anomaly detected. Top contributors: {feature_str}"
 
