@@ -1,0 +1,117 @@
+# AEGIS-UEBA Configuration
+# Adaptive Entity Guardian & Intelligent Security System
+
+app:
+  name: "AEGIS-UEBA"
+  version: "1.0.0"
+  environment: "development"  # development, staging, production
+  debug: true
+  log_level: "INFO"
+
+# Kafka Configuration
+kafka:
+  bootstrap_servers:
+    - "localhost:9092"
+  topics:
+    raw_logs: "aegis.raw_logs"
+    normalized: "aegis.normalized"
+    alerts: "aegis.alerts"
+    feedback: "aegis.feedback"
+  consumer:
+    group_id: "aegis-consumer-group"
+    auto_offset_reset: "earliest"
+    enable_auto_commit: true
+  producer:
+    acks: "all"
+    retries: 3
+
+# Redis Configuration (Hot Data)
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: null
+  key_prefix: "aegis:"
+  session_ttl: 3600  # 1 hour
+  feature_ttl: 86400  # 24 hours
+
+# Elasticsearch Configuration (Warm Data)
+elasticsearch:
+  hosts:
+    - "http://localhost:9200"
+  index: "aegis-logs"
+  session: 86400  # 1 day
+  max_retries: 3
+
+# Neo4j Configuration (Graph Database)
+neo4j:
+  uri: "bolt://localhost:7687"
+  user: "neo4j"
+  password: "aegis_password"
+  database: "neo4j"
+  max_connection_lifetime: 3600
+
+# Feature Store Configuration
+feature_store:
+  window_sizes:
+    - 3600       # 1 hour
+    - 86400      # 24 hours
+    - 604800     # 7 days
+  batch_size: 1000
+  calculation_interval: 60  # seconds
+
+# ML Model Configuration
+models:
+  isolation_forest:
+    contamination: 0.01
+    n_estimators: 200
+    max_samples: "auto"
+  autoencoder:
+    encoding_dim: 32
+    hidden_layers: [128, 64, 32]
+    dropout_rate: 0.2
+    epochs: 100
+    batch_size: 256
+  xgboost:
+    n_estimators: 200
+    max_depth: 6
+    learning_rate: 0.1
+    objective: "binary:logistic"
+  gnn:
+    hidden_channels: 64
+    num_layers: 3
+    num_heads: 4
+    dropout: 0.2
+
+# Explainable AI Configuration
+explainable_ai:
+  provider: "shap"  # shap or lime
+  shap:
+    background_samples: 100
+    nsamples: 200
+  lime:
+    num_samples: 1000
+    num_features: 10
+
+# Feedback Loop Configuration
+feedback:
+  api_host: "0.0.0.0"
+  api_port: 8080
+  retraining:
+    schedule: "0 0 * * 0"  # Weekly on Sunday
+    min_samples: 100
+    confidence_threshold: 0.95
+
+# Data Generation (for testing)
+data_generation:
+  enabled: true
+  events_per_second: 1000
+  attack_probability: 0.02  # 2% of events are attacks
+  users:
+    count: 100
+    departments:
+      - "Engineering"
+      - "IT"
+      - "Finance"
+      - "HR"
+      - "Sales"
