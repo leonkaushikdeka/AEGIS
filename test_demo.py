@@ -128,7 +128,7 @@ def demonstrate_ml_detection(features: dict, feature_names: list) -> dict:
     combined_data = np.vstack(
         [normal_data, np.random.randn(100, len(feature_names)) * 2]
     )
-    xgboost.train(combined_data, labels, feature_names)
+    xgboost.train(combined_data, feature_names, labels)
     print("    [OK] XGBoost trained")
 
     print("\n  Running detection on test data...")

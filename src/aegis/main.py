@@ -7,18 +7,19 @@ __version__ = "1.0.0"
 __author__ = "AEGIS Team"
 
 from aegis.core.config import settings
-from aegis.core.models import Alert, Event, Entity
+from aegis.core.models import Alert, RawEvent, NormalizedEvent, Entity
 from aegis.pipeline import EventIngestionPipeline
 from aegis.features import FeatureEngineeringEngine, FeatureStore
 from aegis.ml import EnsembleDetector
-from aegis.ml.explainability import ExplainableAI
-from aegis.graph import GraphDatabaseManager
+from aegis.ml.xai import ExplainableAI
+from aegis.graph.database import GraphDatabaseManager
 from aegis.api.main import app, create_alert
 
 __all__ = [
     "settings",
     "Alert",
-    "Event",
+    "RawEvent",
+    "NormalizedEvent",
     "Entity",
     "EventIngestionPipeline",
     "FeatureEngineeringEngine",

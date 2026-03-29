@@ -111,7 +111,7 @@ class FeedbackStore:
             return False
 
         self._last_retrain = datetime.utcnow()
-        self._model_version = f"{int(self._model_version.split('.')[0] + 1)}.0.0"
+        self._model_version = f"{int(self._model_version.split('.')[0]) + 1}.0.0"
         logger.info(f"Triggered model retraining, new version: {self._model_version}")
         return True
 

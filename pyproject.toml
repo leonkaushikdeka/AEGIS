@@ -1,10 +1,35 @@
-[main]
-name = "aegis"
-callable = "aegis.main:app"
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
 
-[tool.poetry.scripts]
-aegis-api = "aegis.main:app"
-aegis-generator = "aegis.data.generator:main"
+[project]
+name = "aegis"
+version = "1.0.0"
+description = "Adaptive Entity Guardian & Intelligent Security System - Enterprise UEBA Platform"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "redis>=5.0.0",
+    "numpy>=1.24.0",
+    "scikit-learn>=1.3.0",
+    "joblib>=1.3.0",
+    "pyyaml>=6.0",
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+xgboost = ["xgboost>=2.0.0"]
+graph = ["neo4j>=5.0.0"]
 
 [project.urls]
-Homepage = 'https://github.com/leonkaushikdeka/AEGIS'
+Homepage = "https://github.com/leonkaushikdeka/AEGIS"
+
+[project.scripts]
+aegis-api = "aegis.api.main:app"
+aegis-generator = "aegis.data.generator:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

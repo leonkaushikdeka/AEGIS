@@ -290,3 +290,30 @@ def create_sample_events() -> List[Dict[str, Any]]:
         events.append(generator.generate_event("cloudtrail"))
 
     return events
+
+
+def main() -> None:
+    """Entry point for aegis-generator CLI command"""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="AEGIS Synthetic Data Generator")
+    parser.add_argument("--count", type=int, default=100, help="Number of events to generate")
+    parser.add_argument(
+        "--source",
+        choices=["windows", "linux", "cloudtrail"],
+        default="windows",
+        help="Event source type",
+    )
+    parser.add_argument("--output", type=str, default=None, help="Output file (stdout if omitted)")
+    args = parser.parse_args()
+
+    generator = SyntheticDataGenerator()
+    events = generator.generate_batch(args.count, args.source)
+
+    output = json.dumps(events, indent=2, default=str)
+    if args.output:
+        with open(args.output, "w") as f:
+            f.write(output)
+        logger.info(f"Wrote {len(events)} events to {args.output}")
+    else:
+        print(output)

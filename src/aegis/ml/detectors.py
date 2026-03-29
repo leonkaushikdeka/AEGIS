@@ -209,10 +209,13 @@ class XGBoostModel(BaseDetectionModel):
         self.feature_names: List[str] = []
         self.label_encoder = None
 
-    def train(self, X: np.ndarray, y: np.ndarray, feature_names: List[str]) -> None:
+    def train(self, X: np.ndarray, feature_names: List[str], y: Optional[np.ndarray] = None) -> None:
         """Train XGBoost on labeled data"""
         self.feature_names = feature_names
         X_scaled = self.scaler.fit_transform(X)
+
+        if y is None:
+            y = np.zeros(len(X))
 
         try:
             import xgboost as xgb
@@ -281,16 +284,21 @@ class EnsembleDetector:
         logger.info(f"Added model: {model.name}")
 
     def train(
-        self, X_normal: np.ndarray, X_attack: Optional[np.ndarray] = None
+        self,
+        X_normal: np.ndarray,
+        X_attack: Optional[np.ndarray] = None,
+        feature_names: Optional[List[str]] = None,
     ) -> None:
         """Train all models"""
+        if feature_names is None:
+            feature_names = []
         for name, model in self.models.items():
             if isinstance(model, XGBoostModel) and X_attack is not None:
                 y = np.concatenate([np.zeros(len(X_normal)), np.ones(len(X_attack))])
                 X_combined = np.vstack([X_normal, X_attack])
-                model.train(X_combined, y, [])
+                model.train(X_combined, feature_names, y)
             else:
-                model.train(X_normal, [])
+                model.train(X_normal, feature_names)
 
     def predict(self, X: np.ndarray, feature_names: List[str]) -> EnsemblePrediction:
         """Run all models and combine predictions"""

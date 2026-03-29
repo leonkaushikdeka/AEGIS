@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from aegis.core.config import settings
-from aegis.core.models import Alert, AlertStatus, Severity, AttackType
+from aegis.core.models import Alert, AlertStatus, Severity, AttackType, EntityType
 from aegis.api.feedback import feedback_router
 
 logging.basicConfig(
@@ -269,7 +269,7 @@ def create_alert(
     """Helper function to create and store an alert"""
     alert = Alert(
         entity_id=entity_id,
-        entity_type="user",
+        entity_type=EntityType.USER,
         severity=severity,
         attack_type=attack_type,
         confidence=confidence,
