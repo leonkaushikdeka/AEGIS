@@ -5,3 +5,6 @@ callable = "aegis.main:app"
 [tool.poetry.scripts]
 aegis-api = "aegis.main:app"
 aegis-generator = "aegis.data.generator:main"
+
+[project.urls]
+Homepage = 'https://github.com/leonkaushikdeka/AEGIS'

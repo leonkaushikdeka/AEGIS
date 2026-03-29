@@ -324,3 +324,7 @@ For issues and feature requests, please open a GitHub issue.
 ---
 
 Built with security and intelligence in mind.
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guidelines before submitting PRs.
