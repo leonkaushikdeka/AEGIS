@@ -44,10 +44,11 @@ elasticsearch:
   max_retries: 3
 
 # Neo4j Configuration (Graph Database)
+# Password must be set via NEO4J_PASSWORD environment variable
 neo4j:
   uri: "bolt://localhost:7687"
   user: "neo4j"
-  password: "aegis_password"
+  password: ""
   database: "neo4j"
   max_connection_lifetime: 3600
 

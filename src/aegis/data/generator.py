@@ -6,7 +6,7 @@ import json
 import logging
 import random
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
@@ -141,7 +141,7 @@ class SyntheticDataGenerator:
 
     def _generate_timestamp(self, user: Dict[str, Any]) -> datetime:
         """Generate timestamp within user's work hours"""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         start_hour, end_hour = user["work_hours"]
         hour = random.randint(start_hour, end_hour)
         minute = random.randint(0, 59)
@@ -209,7 +209,7 @@ class SyntheticDataGenerator:
             "location": location,
             "city": location["city"],
             "country": "US" if location["city"] == "New York" else "GB",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     def _create_data_exfiltration_event(self) -> Dict[str, Any]:
@@ -221,7 +221,7 @@ class SyntheticDataGenerator:
             "source_ip": random.choice(user["ip_addresses"]),
             "file_path": f"/data/exfil_{random.randint(1000, 9999)}.zip",
             "bytes_transferred": random.randint(1000000, 10000000),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     def _create_privilege_escalation_event(self) -> Dict[str, Any]:
@@ -233,7 +233,7 @@ class SyntheticDataGenerator:
             "source_ip": random.choice(user["ip_addresses"]),
             "old_privileges": "user",
             "new_privileges": "root",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     def generate_event(self, source_type: str = "windows") -> Dict[str, Any]:

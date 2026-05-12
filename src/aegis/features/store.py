@@ -2,7 +2,7 @@
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import redis
@@ -143,7 +143,7 @@ class FeatureStore:
             data = {
                 "features": features,
                 "version": version,
-                "updated_at": datetime.utcnow().isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
             client.setex(key, self.feature_ttl * 7, json.dumps(data))
             return True
@@ -171,7 +171,7 @@ class FeatureStore:
             key = f"{self.key_prefix}population_baseline:{department}"
             data = {
                 "features": features,
-                "updated_at": datetime.utcnow().isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }
             client.setex(key, self.feature_ttl * 7, json.dumps(data))
             return True
@@ -188,7 +188,7 @@ class FeatureStore:
             key = self._make_key(entity_id, f"prediction:{model_name}")
             data = {
                 **prediction,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
             client.setex(key, self.feature_ttl, json.dumps(data))
             return True

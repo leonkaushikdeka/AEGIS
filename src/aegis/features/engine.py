@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
 from collections import defaultdict
 
@@ -53,7 +53,7 @@ class FeatureEngineeringEngine:
 
     def get_time_window_events(self, entity_id: str, window_seconds: int) -> List[NormalizedEvent]:
         """Get events for an entity within the specified time window"""
-        cutoff = datetime.utcnow() - timedelta(seconds=window_seconds)
+        cutoff = datetime.now(timezone.utc) - timedelta(seconds=window_seconds)
         events = self.entity_events.get(entity_id, [])
         return [e for e in events if e.timestamp >= cutoff]
 
@@ -88,7 +88,7 @@ class FeatureEngineeringEngine:
 
         return FeatureVector(
             entity_id=entity_id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             window_size=window_seconds,
             features=features,
             is_valid=is_valid,
@@ -108,7 +108,7 @@ class FeatureEngineeringEngine:
 
     def cleanup_old_events(self, max_age_seconds: int = 604800) -> int:
         """Remove events older than max_age_seconds"""
-        cutoff = datetime.utcnow() - timedelta(seconds=max_age_seconds)
+        cutoff = datetime.now(timezone.utc) - timedelta(seconds=max_age_seconds)
         removed_count = 0
 
         for entity_id in list(self.entity_events.keys()):

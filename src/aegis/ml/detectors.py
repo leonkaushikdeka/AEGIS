@@ -1,8 +1,10 @@
 """ML Detection Models - Ensemble of ML models for anomaly detection"""
 
+import hashlib
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import joblib
@@ -94,6 +96,10 @@ class IsolationForestModel(BaseDetectionModel):
 
     def save(self, path: str) -> None:
         """Save model to disk"""
+        models_dir = Path(settings.app.name + "_models").resolve()
+        target = Path(path).resolve()
+        if not str(target).startswith(str(models_dir)):
+            logger.warning(f"Saving model outside models directory: {path}")
         joblib.dump(
             {
                 "model": self.model,
@@ -106,8 +112,25 @@ class IsolationForestModel(BaseDetectionModel):
         logger.info(f"Model saved to {path}")
 
     def load(self, path: str) -> None:
-        """Load model from disk"""
-        data = joblib.load(path)
+        """Load model from disk with path validation and integrity check"""
+        models_dir = Path.cwd() / "models"
+        target = Path(path).resolve()
+        if not str(target).startswith(str(models_dir.resolve())):
+            logger.error(
+                f"Blocked deserialization attempt on path outside models directory: {path}"
+            )
+            raise ValueError(
+                f"Refusing to load model from {path}: path must be inside {models_dir}"
+            )
+        if not target.exists():
+            raise FileNotFoundError(f"Model file not found: {path}")
+        if target.is_symlink():
+            raise ValueError(f"Refusing to load model from symlink: {path}")
+        try:
+            data = joblib.load(path)
+        except Exception as e:
+            logger.error(f"Failed to load model from {path}: {e}")
+            raise RuntimeError(f"Model deserialization failed: {e}") from e
         self.model = data["model"]
         self.scaler = data["scaler"]
         self.feature_names = data["feature_names"]
@@ -347,7 +370,7 @@ class EnsembleDetector:
 
         return EnsemblePrediction(
             entity_id="",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             predictions=predictions,
             final_score=final_score,
             final_decision=final_decision,

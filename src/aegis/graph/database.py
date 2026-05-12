@@ -1,7 +1,7 @@
 """Graph Database Module - Neo4j integration for entity relationships"""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
@@ -112,7 +112,7 @@ class GraphDatabaseManager:
             target_id=resource_id,
             edge_type=action,
             weight=1.0,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
         )
         return self.create_relationship(edge)
 

@@ -41,3 +41,10 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Generated secrets
+.api_key
+.jwt_secret
+
+# SQLite databases
+*.db

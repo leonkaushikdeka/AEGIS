@@ -9,6 +9,21 @@ from aegis.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+_SHAP_AVAILABLE = False
+_LIME_AVAILABLE = False
+
+try:
+    import shap as _shap  # noqa: F401
+    _SHAP_AVAILABLE = True
+except ImportError:
+    pass
+
+try:
+    import lime as _lime  # noqa: F401
+    _LIME_AVAILABLE = True
+except ImportError:
+    pass
+
 
 class BaseExplainer(ABC):
     """Abstract base class for explainability methods"""
@@ -38,6 +53,23 @@ class SHAPExplainer(BaseExplainer):
         self, model: Any, instance: np.ndarray, feature_names: List[str]
     ) -> Dict[str, float]:
         """Explain a single prediction using SHAP"""
+        if _SHAP_AVAILABLE:
+            import shap
+            try:
+                if self.explainer is None:
+                    if hasattr(model, "predict"):
+                        self.explainer = shap.Explainer(model.predict, shap.maskers.Independent(instance))
+                    else:
+                        self.explainer = shap.Explainer(model)
+                shap_values = self.explainer(instance.reshape(1, -1) if instance.ndim == 1 else instance[:1])
+                values = shap_values.values
+                if hasattr(values, "shape") and values.ndim > 1:
+                    values = values[0]
+                return dict(zip(feature_names, np.abs(values).tolist()))
+            except Exception as e:
+                logger.warning(f"SHAP computation failed, using fallback: {e}")
+
+        logger.warning("SHAP explainer using fallback (abs feature values) — install 'shap' for real SHAP values")
         feature_importance = {}
         for i, name in enumerate(feature_names):
             if i < len(instance):
@@ -58,6 +90,24 @@ class LIMEExplainer(BaseExplainer):
         self, model: Any, instance: np.ndarray, feature_names: List[str]
     ) -> Dict[str, float]:
         """Explain a single prediction using LIME"""
+        if _LIME_AVAILABLE:
+            import lime.lime_tabular
+            try:
+                explainer = lime.lime_tabular.LimeTabularExplainer(
+                    training_data=instance.reshape(1, -1) if instance.ndim == 1 else instance,
+                    feature_names=feature_names,
+                    mode="regression",
+                )
+                exp = explainer.explain_instance(
+                    instance.flatten() if instance.ndim > 1 else instance,
+                    predict_fn=model.predict if hasattr(model, "predict") else model,
+                    num_features=self.num_features,
+                )
+                return dict(exp.as_list())
+            except Exception as e:
+                logger.warning(f"LIME computation failed, using fallback: {e}")
+
+        logger.warning("LIME explainer using fallback (abs feature values) — install 'lime' for real LIME values")
         feature_importance = {}
         for i, name in enumerate(feature_names):
             if i < len(instance):

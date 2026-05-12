@@ -1,7 +1,7 @@
 """Feedback Loop API - Analyst feedback and model retraining"""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
@@ -65,7 +65,7 @@ class FeedbackStore:
             feedback_id=feedback_id,
             alert_id=feedback.alert_id,
             analyst_id=feedback.analyst_id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             is_true_positive=feedback.is_true_positive,
             confidence=feedback.confidence,
             notes=feedback.notes,
@@ -82,7 +82,7 @@ class FeedbackStore:
                 "alert_id": feedback.alert_id,
                 "is_true_positive": feedback.is_true_positive,
                 "features": {},
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
             }
         )
 
@@ -110,7 +110,7 @@ class FeedbackStore:
             logger.info("Not enough samples for retraining")
             return False
 
-        self._last_retrain = datetime.utcnow()
+        self._last_retrain = datetime.now(timezone.utc)
         self._model_version = f"{int(self._model_version.split('.')[0]) + 1}.0.0"
         logger.info(f"Triggered model retraining, new version: {self._model_version}")
         return True

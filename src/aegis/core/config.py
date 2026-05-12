@@ -8,6 +8,9 @@ from functools import lru_cache
 import yaml
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class KafkaConfig(BaseModel):
@@ -45,9 +48,20 @@ class Neo4jConfig(BaseModel):
 
     uri: str = "bolt://localhost:7687"
     user: str = "neo4j"
-    password: str = "password"
+    password: str = ""
     database: str = "neo4j"
     max_connection_lifetime: int = 3600
+
+    def model_post_init(self, __context):
+        env_password = os.environ.get("NEO4J_PASSWORD")
+        if env_password:
+            self.password = env_password
+        if not self.password:
+            env = os.environ.get("AEGIS_ENV", os.environ.get("AEGIS_ENVIRONMENT", "development"))
+            if env == "production":
+                raise ValueError(
+                    "NEO4J_PASSWORD environment variable must be set in production mode"
+                )
 
 
 class FeatureStoreConfig(BaseModel):
