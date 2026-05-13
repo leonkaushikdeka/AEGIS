@@ -244,8 +244,12 @@ async def auth_login(request: LoginRequest):
     """Authenticate and receive a JWT token"""
     if not request.username or not request.password:
         raise HTTPException(status_code=422, detail="Username and password required")
+    # TODO: Implement proper user authentication against a user store
+    # For now, any non-empty credentials are accepted in development mode
+    if settings.app.environment != "development":
+        raise HTTPException(status_code=403, detail="Authentication disabled in non-development mode")
     expire = datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS)
-    token_data["exp"] = expire
+    token_data = {"sub": request.username, "exp": expire}
     access_token = jwt.encode(token_data, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return LoginResponse(
         access_token=access_token,
