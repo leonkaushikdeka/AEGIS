@@ -1,0 +1,133 @@
+
+============================================================
+  AEGIS-UEBA - Adaptive Entity Guardian & Intelligent Security
+  Enterprise AI-Driven Security Operations Center Platform
+============================================================
+
+  Version: 1.0.0
+  Environment: development
+  Window Sizes: [3600, 86400, 604800]
+  ML Models: Isolation Forest, Autoencoder, XGBoost
+Generating synthetic security events...
+  Generated 50 events
+
+============================================================
+  Feature Engineering Engine
+============================================================
+
+  Normalized 19 events
+
+  Entity: user:frank.williams22
+  Features extracted: 99
+  Sample features: ['w3600_login_count', 'w3600_unique_hosts', 'w3600_unique_ips', 'w3600_failed_logins', 'w3600_successful_logins']...
+
+============================================================
+  ML Detection Ensemble
+============================================================
+
+  Feature vector shape: (1, 20)
+
+  Training models...
+    [OK] Isolation Forest trained
+    [OK] Autoencoder trained
+    [OK] XGBoost trained
+
+  Running detection on test data...
+
+  Detection Results:
+    Isolation Forest Score: 1.0000
+    Autoencoder Score:      1.0000
+    XGBoost Score:          0.0336
+
+============================================================
+  Explainable AI (SHAP/LIME)
+============================================================
+
+  Generating explanation for anomaly...
+
+  Explainer: shap
+
+  Top Contributing Factors:
+    1. w3600_unique_hosts: 2.0000 (22.2%)
+    2. w3600_avg_events_per_hour: 2.0000 (22.2%)
+    3. w3600_login_count: 1.0000 (11.1%)
+
+  Narrative:
+    Alert triggered due to multiple factors: unusual w3600_unique_hosts, unusual w3600_avg_events_per_hour, somewhat unusual w3600_login_count, somewhat unusual w3600_unique_ips, and somewhat unusual w3600_failed_logins.
+
+============================================================
+  Graph Analysis (Neo4j Integration
+============================================================
+
+  Graph database features:
+    * Entity relationship mapping
+    * Lateral movement detection
+    * Degree centrality calculation
+    * Shortest path analysis
+    * Clustering coefficient
+
+  Example: Detecting lateral movement
+    User_A -> Server_1 -> Database_1 (normal)
+    User_A -> Server_5 -> Database_2 (potential lateral movement)
+
+  Note: Connect to Neo4j to enable full graph analysis
+
+============================================================
+  Alert Generation
+============================================================
+
+  Alert ID:        926de635-8f77-4130-b419-d8b2d17212f0
+  Severity:        high
+  Anomaly Score:   0.68
+  Confidence:      0.85
+  Title:           Anomalous Behavior Detected - User: john.smith
+  Description:     ML models detected unusual behavior patterns with score 0.68...
+
+============================================================
+  Feedback Loop API
+============================================================
+
+  API Endpoints:
+    POST /api/v1/feedback       - Submit analyst feedback
+    GET  /api/v1/feedback/stats - Get feedback statistics
+    POST /api/v1/retraining/trigger - Trigger model retraining
+
+  Feedback Flow:
+    1. Analyst reviews alert
+    2. Submits feedback (true/false positive)
+    3. System collects feedback
+    4. When enough samples: triggers retraining
+    5. Models updated with new labels
+
+============================================================
+  Demo Complete
+============================================================
+
+  AEGIS-UEBA platform demonstration finished successfully!
+
+  Next Steps:
+    1. Connect to Kafka for real-time ingestion
+    2. Connect to Redis for feature storage
+    3. Connect to Neo4j for graph analysis
+    4. Run API: python -m uvicorn aegis.api.main:app --port 8080
+
+
+2026-05-19 12:48:15,023 - aegis.api.main - INFO - Generated new key file: D:\active projects\AEGIS\.api_key
+2026-05-19 12:48:15,023 - aegis.api.main - INFO - Generated new key file: D:\active projects\AEGIS\.jwt_secret
+D:\active projects\AEGIS\test_demo.py:56: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  datetime.utcnow() - timedelta(hours=1, minutes=i)
+2026-05-19 12:48:15,259 - aegis.ml.detectors - INFO - Isolation Forest trained on 100 samples
+C:\Users\leonk\AppData\Local\Programs\Python\Python313\Lib\site-packages\sklearn\neural_network\_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+2026-05-19 12:48:15,412 - aegis.ml.detectors - INFO - Autoencoder trained on 100 samples
+C:\Users\leonk\AppData\Local\Programs\Python\Python313\Lib\site-packages\xgboost\training.py:200: UserWarning: [12:48:15] WARNING: C:\actions-runner\_work\xgboost\xgboost\src\learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+2026-05-19 12:48:15,788 - aegis.ml.detectors - INFO - XGBoost trained on 200 samples
+2026-05-19 12:48:15,827 - aegis.ml.detectors - INFO - Added model: isolation_forest
+2026-05-19 12:48:15,827 - aegis.ml.detectors - INFO - Added model: autoencoder
+2026-05-19 12:48:15,827 - aegis.ml.detectors - INFO - Added model: xgboost
+2026-05-19 12:48:15,828 - aegis.ml.xai - INFO - Using shap explainer
+2026-05-19 12:48:15,828 - aegis.ml.xai - WARNING - SHAP computation failed, using fallback: tuple index out of range
+2026-05-19 12:48:15,828 - aegis.ml.xai - WARNING - SHAP explainer using fallback (abs feature values) — install 'shap' for real SHAP values

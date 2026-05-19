@@ -104,6 +104,8 @@ cp config.yaml.example config.yaml
 python test_demo.py
 ```
 
+![AEGIS-UEBA Demo](screenshots/demo.png)
+
 ### Running the API Server
 
 ```bash
